@@ -1,0 +1,24 @@
+﻿@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<button class="btn btn-danger" @onclick="DeleteShirt">Delete Shirt</button>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private async Task DeleteShirt()
+    {
+        var response = await HttpClient.DeleteAsync($"http://localhost:5262/api/shirts/{Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Shirt deleted successfully, reload the current page to reflect changes
+            NavigationManager.NavigateTo("/shirts", forceLoad: true);
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+}

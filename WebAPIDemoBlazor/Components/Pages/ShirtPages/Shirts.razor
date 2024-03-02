@@ -1,0 +1,79 @@
+﻿@page "/shirts"
+@using System.ComponentModel.DataAnnotations
+@using WebAPIDemoBlazor.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@{
+	IQueryable<string> Names = displayNames;
+	string a = Names.Skip(1).FirstOrDefault();
+}
+
+<PageTitle>Shirts</PageTitle>
+
+<h1>Shirts</h1>
+
+@if (shirts == null)
+{
+	<p>Loading...</p>
+}
+else if (!shirts.Any())
+{
+	<p>No shirts available.</p>
+}
+else
+{
+	<div class="card card-body">
+
+		<QuickGrid Items="@shirts" class="table table-striped">
+			<PropertyColumn Title="@Names.Skip(1).FirstOrDefault()" Property="@(shirt => shirt.Brand)" Sortable="true" />
+			<PropertyColumn Title="@Names.Skip(2).FirstOrDefault()" Property="@(shirt => shirt.Color)" Sortable="true" />
+			<PropertyColumn Title="@Names.Skip(3).FirstOrDefault()" Property="@(shirt => shirt.Size)" Sortable="true" />
+			<PropertyColumn Title="@Names.Skip(4).FirstOrDefault()" Property="@(shirt => shirt.Gender)" Sortable="true" />
+			<PropertyColumn Title="@Names.Skip(5).FirstOrDefault()" Property="@(shirt => shirt.price)" Sortable="true" />
+ 		<TemplateColumn Title="Actions">
+			<!--In this code, @context refers to the current item being iterated over in the QuickGrid component, and @context.ShirtId accesses the ShirtId property of each Shirt object. This should resolve the errors you encountered.-->
+			<EditButton Id="@context.ShirtId" />
+			<DeleteButton Id="@context.ShirtId" />
+		</TemplateColumn>
+	</QuickGrid>
+	</div>
+}
+
+<CreatButton />
+
+
+@code {
+
+	IQueryable<Shirt> shirts;
+	IQueryable<string> displayNames = Shirt.GetDisplayNames();
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		// Make the HTTP request to fetch shirts data from the backend API
+		var response = await HttpClient.GetAsync("http://localhost:5262/api/shirts");
+
+		if (response.IsSuccessStatusCode)
+		{
+			// Deserialize the response body to a list of shirts
+			var shirtModels = await response.Content.ReadFromJsonAsync<List<Shirt>>();
+
+			shirts = shirtModels.Select(s => new Shirt
+				{
+					ShirtId = s.ShirtId,
+					Brand = s.Brand,
+					Color = s.Color,
+					Size = s.Size,
+					Gender = s.Gender,
+					price = s.price
+				}).AsQueryable();
+		}
+		else
+		{
+		}
+	}
+	
+}
+

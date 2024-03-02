@@ -1,0 +1,11 @@
+﻿@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<button class="btn btn-primary" @onclick="CreateNewShirt">Create New Shirt</button>
+
+@code {
+    private void CreateNewShirt()
+    {
+        NavigationManager.NavigateTo("/create-shirt");
+    }
+}

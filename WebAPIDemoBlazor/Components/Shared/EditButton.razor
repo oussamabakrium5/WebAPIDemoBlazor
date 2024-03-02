@@ -1,0 +1,13 @@
+﻿@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<button class="btn btn-primary" @onclick="EditShirt">Edit Shirt</button>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private void EditShirt()
+    {
+        NavigationManager.NavigateTo($"/create-shirt/{Id}");
+    }
+}

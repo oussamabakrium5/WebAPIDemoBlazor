@@ -1,0 +1,103 @@
+﻿@page "/create-shirt"
+@page "/create-shirt/{id:int}"
+@using WebAPIDemoBlazor.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+@if(Id == null)
+{
+    <h3>Create Shirt</h3>
+} 
+else
+{
+    <h3>Edit Shirt</h3>
+}
+
+<EditForm Model="shirt" OnSubmit="HandleSubmit" FormName="creatShirt">
+    <InputNumber @bind-Value="shirt.ShirtId" hidden></InputNumber>
+    <div class="mb-3">
+        <labe class="form-label">Brand</labe>
+        <InputText @bind-Value="shirt.Brand" class="form-control" placeholder="My Brand">@shirt.Brand</InputText>
+    </div>
+    <div class="mb-3">
+        <labe class="form-label">Color</labe>
+        <InputText @bind-Value="shirt.Color" class="form-control" placeholder="Red">@shirt.Color</InputText>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Size</label>
+        <InputNumber @bind-Value="shirt.Size" class="form-control" placeholder="10">@shirt.Size</InputNumber>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Gender</label>
+        <InputText @bind-Value="shirt.Gender" class="form-control" placeholder="Men">@shirt.Gender</InputText>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Price</label>
+        <InputNumber @bind-Value="shirt.price" class="form-control" placeholder="70">@shirt.price</InputNumber>
+    </div>
+
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+
+    
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [SupplyParameterFromForm]
+    Shirt shirt { get; set; } = new Shirt();
+    Shirt shirtEdited { get; set; } = new Shirt();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != 0)
+        {
+            shirtEdited = new Shirt
+                {
+                    ShirtId = shirt.ShirtId,
+                    Brand = shirt.Brand,
+                    Color = shirt.Color,
+                    Size = shirt.Size,
+                    Gender = shirt.Gender,
+                    price = shirt.price
+                };
+            // Fetch shirt data if editing
+            shirt = await HttpClient.GetFromJsonAsync<Shirt>($"http://localhost:5262/api/shirts/{Id}");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (shirt.ShirtId == 0)
+        {
+            var response = await HttpClient.PostAsJsonAsync("http://localhost:5262/api/shirts", shirt);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Shirt created successfully, navigate back to the shirts page
+                NavigationManager.NavigateTo("/shirts");
+            }
+            else
+            {
+                // Handle error if the request was not successful
+                // For example, display an error message or log the error
+            }
+        }
+        else
+        {
+            // Edit shirt
+            var response = await HttpClient.PutAsJsonAsync($"http://localhost:5262/api/shirts/{shirtEdited.ShirtId}", shirtEdited);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/shirts");
+            }
+            else
+            {
+                // Handle error
+            }
+        }
+    }
+}
